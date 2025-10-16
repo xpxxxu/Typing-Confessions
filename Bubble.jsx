@@ -20,7 +20,6 @@ export default function Bubble({ message }) {
     <div
       className="absolute bg-purple-500 text-white px-5 py-3 rounded-full shadow-lg text-center max-w-xs break-words cursor-pointer transition-all duration-1000"
       style={{ top: position.top, left: position.left }}
-      title={message}
     >
       {message.length > 30 ? message.slice(0, 30) + "..." : message}
     </div>
