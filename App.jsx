@@ -1,40 +1,47 @@
-import React, { useEffect, useState } from "react";
-import { collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, deleteDoc, doc } from "firebase/firestore";
-import { db } from "./firebase";
+import React, { useState } from "react";
 import Bubble from "./Bubble";
 
 export default function App() {
   const [message, setMessage] = useState("");
-  const [bubbles, setBubbles] = useState([]);
+  const [bubbles, setBubbles] = useState([
+    "This is a test confession!",
+    "I ate the last cookie 🍪",
+    "I secretly like pineapple on pizza 🍍",
+  ]);
 
-  useEffect(() => {
-    const q = query(collection(db, "confessions"), orderBy("timestamp", "desc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const now = new Date();
-      const freshBubbles = [];
-      snapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        const age = now - data.timestamp?.toDate();
-        if (age < 24 * 60 * 60 * 1000) {
-          freshBubbles.push({ id: docSnap.id, message: data.message });
-        } else {
-          deleteDoc(doc(db, "confessions", docSnap.id));
-        }
-      });
-      setBubbles(freshBubbles);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const postMessage = async () => {
+  const postMessage = () => {
     if (message.trim() === "") return;
-    await addDoc(collection(db, "confessions"), {
-      message,
-      timestamp: serverTimestamp(),
-    });
+    setBubbles((prev) => [...prev, message]);
     setMessage("");
   };
 
+  return (
+    <div className="relative w-screen h-screen bg-gradient-to-b from-pink-500 via-purple-500 to-blue-500 overflow-hidden">
+
+      {/* Confessions */}
+      {bubbles.map((b, i) => (
+        <Bubble key={i} message={b} />
+      ))}
+
+      {/* Input Area */}
+      <div className="absolute bottom-5 w-full px-4 flex gap-2">
+        <input
+          className="flex-1 px-4 py-3 rounded-full text-black text-lg"
+          type="text"
+          placeholder="Type your secret..."
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+        />
+        <button
+          className="bg-white text-purple-600 px-6 py-3 rounded-full font-bold text-lg"
+          onClick={postMessage}
+        >
+          Post
+        </button>
+      </div>
+    </div>
+  );
+}
   return (
     <div className="relative w-screen h-screen bg-gradient-to-b from-pink-500 via-purple-500 to-blue-500 overflow-hidden">
       {bubbles.map((b) => (
